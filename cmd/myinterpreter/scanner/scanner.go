@@ -10,7 +10,13 @@ const (
 	RIGHT_PAREN
 	LEFT_BRACE
 	RIGHT_BRACE
+	COMMA
+	DOT
+	MINUS
+	PLUS
 	SEMICOLON
+	SLASH
+	STAR
 
 	// One or two character tokens
 	EQUAL
@@ -30,7 +36,7 @@ func (t TokenType) String() string {
 	return [...]string{
 		"LEFT_PAREN", "RIGHT_PAREN",
 		"LEFT_BRACE", "RIGHT_BRACE",
-		"SEMICOLON",
+		"COMMA", "DOT", "MINUS", "PLUS", "SEMICOLON", "SLASH", "STAR",
 		"EQUAL",
 		"IDENTIFIER", "STRING", "NUMBER",
 		"VAR",
@@ -53,6 +59,20 @@ func Tokenize(input []byte) ([]string, error) {
 			tokens = append(tokens, fmt.Sprintf("%s %s null", LEFT_BRACE.String(), string(t)))
 		case '}':
 			tokens = append(tokens, fmt.Sprintf("%s %s null", RIGHT_BRACE.String(), string(t)))
+		case ',':
+			tokens = append(tokens, fmt.Sprintf("%s %s null", COMMA.String(), string(t)))
+		case '.':
+			tokens = append(tokens, fmt.Sprintf("%s %s null", DOT.String(), string(t)))
+		case '-':
+			tokens = append(tokens, fmt.Sprintf("%s %s null", MINUS.String(), string(t)))
+		case '+':
+			tokens = append(tokens, fmt.Sprintf("%s %s null", PLUS.String(), string(t)))
+		case ';':
+			tokens = append(tokens, fmt.Sprintf("%s %s null", SEMICOLON.String(), string(t)))
+		case '/':
+			tokens = append(tokens, fmt.Sprintf("%s %s null", SLASH.String(), string(t)))
+		case '*':
+			tokens = append(tokens, fmt.Sprintf("%s %s null", STAR.String(), string(t)))
 		case '\n': //ignore line feeds
 		case '\r': //ignore carriage returns
 		default:
