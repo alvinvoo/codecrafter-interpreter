@@ -20,8 +20,6 @@ func main() {
 		os.Exit(1)
 	}
 
-	// Uncomment this block to pass the first stage
-	//
 	filename := os.Args[2]
 	fileContents, err := os.ReadFile(filename)
 	if err != nil {
@@ -29,13 +27,9 @@ func main() {
 		os.Exit(1)
 	}
 
-	if len(fileContents) > 0 {
-		stringSlice := scanner.Tokenize(fileContents)
+	stringSlice := scanner.Tokenize(fileContents)
 
-		for _, s := range stringSlice {
-			fmt.Println(s)
-		}
-	} else {
-		fmt.Println("EOF  null") // Placeholder, remove this line when implementing the scanner
+	for _, s := range stringSlice {
+		fmt.Println(s)
 	}
 }
