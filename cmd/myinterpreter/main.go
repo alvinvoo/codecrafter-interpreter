@@ -27,7 +27,11 @@ func main() {
 		os.Exit(1)
 	}
 
-	stringSlice := scanner.Tokenize(fileContents)
+	stringSlice, err := scanner.Tokenize(fileContents)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Error tokenizing: %v\n", err)
+		os.Exit(1)
+	}
 
 	for _, s := range stringSlice {
 		fmt.Println(s)
