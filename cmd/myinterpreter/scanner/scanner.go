@@ -114,6 +114,20 @@ func Tokenize(input []byte) ([]string, []string) {
 			} else {
 				tokens = addToken(tokens, BANG, string(t), "null")
 			}
+		case '<':
+			if nextMatch(i, input, '=') {
+				tokens = addToken(tokens, LESS_EQUAL, "<=", "null")
+				i += 1
+			} else {
+				tokens = addToken(tokens, LESS, string(t), "null")
+			}
+		case '>':
+			if nextMatch(i, input, '=') {
+				tokens = addToken(tokens, GREATER_EQUAL, ">=", "null")
+				i += 1
+			} else {
+				tokens = addToken(tokens, GREATER, string(t), "null")
+			}
 		case '\n': //ignore line feeds
 		case '\r': //ignore carriage returns
 		default:
