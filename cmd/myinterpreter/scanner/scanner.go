@@ -81,8 +81,12 @@ func (s *Scanner) addError(message string) {
 	s.errors = append(s.errors, fmt.Sprintf("[line %d] Error: %s", s.line, message))
 }
 
+func (s *Scanner) isAtEnd() bool {
+	return s.current >= len(s.source)-1
+}
+
 func (s *Scanner) nextMatch(expected byte) bool {
-	if s.current == (len(s.source) - 1) {
+	if s.isAtEnd() {
 		return false
 	}
 
@@ -95,14 +99,6 @@ func (s *Scanner) nextMatch(expected byte) bool {
 
 func (s *Scanner) advance() {
 	s.current += 1
-}
-
-func (s *Scanner) isAtEnd() bool {
-	return s.current >= len(s.source)
-}
-
-func (s *Scanner) isLineBreak() bool {
-	return s.source[s.current] == '\n'
 }
 
 func (s *Scanner) addEOF() {
@@ -169,7 +165,7 @@ func (s *Scanner) Tokenize() {
 		case '/':
 			if s.nextMatch('/') {
 				// it's a comment, ignore the rest of the line
-				for !s.isAtEnd() && !s.isLineBreak() {
+				for !s.isAtEnd() && !s.nextMatch('\n') {
 					s.advance()
 				}
 			} else {
