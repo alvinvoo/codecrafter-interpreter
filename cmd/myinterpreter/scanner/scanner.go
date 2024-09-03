@@ -45,8 +45,9 @@ func (t TokenType) String() string {
 }
 
 // output: <token_type> <lexeme> <literal>
-func Tokenize(input []byte) ([]string, error) {
+func Tokenize(input []byte) ([]string, []string) {
 	var tokens []string
+	var errors []string
 	for len(input) > 0 {
 		t := input[0]
 
@@ -76,7 +77,7 @@ func Tokenize(input []byte) ([]string, error) {
 		case '\n': //ignore line feeds
 		case '\r': //ignore carriage returns
 		default:
-			return nil, fmt.Errorf("unexpected character: %q", t)
+			errors = append(errors, fmt.Sprintf("[line 1] Error: Unexpected character: %s", string(t)))
 		}
 
 		input = input[1:]
@@ -84,5 +85,5 @@ func Tokenize(input []byte) ([]string, error) {
 
 	tokens = append(tokens, "EOF  null")
 
-	return tokens, nil
+	return tokens, errors
 }
