@@ -133,7 +133,7 @@ func Tokenize(input []byte) ([]string, []string) {
 					i += 1
 				}
 			} else {
-				addToken(tokens, SLASH, string(t), "null")
+				tokens = addToken(tokens, SLASH, string(t), "null")
 			}
 		case ' ':
 		case '\t':
