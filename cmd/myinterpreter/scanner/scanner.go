@@ -109,6 +109,10 @@ func (s *Scanner) addEOF() {
 	s.tokens = append(s.tokens, "EOF  null")
 }
 
+func (s *Scanner) addLine() {
+	s.line += 1
+}
+
 func (s *Scanner) Tokenize() {
 	for s.current < len(s.source) {
 		t := s.source[s.current]
@@ -171,10 +175,11 @@ func (s *Scanner) Tokenize() {
 			} else {
 				s.addToken(SLASH, string(t), "null")
 			}
-		case ' ':
-		case '\t':
+		case ' ': //ignore whitespace
+		case '\t': //ignore tab
 		case '\r': //ignore carriage returns
-		case '\n': //ignore line feeds
+		case '\n':
+			s.addLine()
 		default:
 			s.addError(fmt.Sprintf("Unexpected character: %s", string(t)))
 		}
