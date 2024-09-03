@@ -96,8 +96,6 @@ func Tokenize(input []byte) ([]string, []string) {
 			tokens = addToken(tokens, PLUS, string(t), "null")
 		case ';':
 			tokens = addToken(tokens, SEMICOLON, string(t), "null")
-		case '/':
-			tokens = addToken(tokens, SLASH, string(t), "null")
 		case '*':
 			tokens = addToken(tokens, STAR, string(t), "null")
 		case '=':
@@ -128,8 +126,19 @@ func Tokenize(input []byte) ([]string, []string) {
 			} else {
 				tokens = addToken(tokens, GREATER, string(t), "null")
 			}
-		case '\n': //ignore line feeds
+		case '/':
+			if nextMatch(i, input, '/') {
+				// it's a comment, ignore the rest of the line
+				for i < len(input) && input[i] != '\n' {
+					i += 1
+				}
+			} else {
+				addToken(tokens, SLASH, string(t), "null")
+			}
+		case ' ':
+		case '\t':
 		case '\r': //ignore carriage returns
+		case '\n': //ignore line feeds
 		default:
 			errors = append(errors, fmt.Sprintf("[line 1] Error: Unexpected character: %s", string(t)))
 		}
