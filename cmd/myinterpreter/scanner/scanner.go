@@ -139,7 +139,7 @@ func (s *Scanner) Tokenize() {
 				s.addToken(EQUAL_EQUAL, "==", "null")
 				s.advance()
 			} else {
-				s.addToken(EQUAL, "==", "null")
+				s.addToken(EQUAL, "=", "null")
 			}
 		case '!':
 			if s.nextMatch('=') {
