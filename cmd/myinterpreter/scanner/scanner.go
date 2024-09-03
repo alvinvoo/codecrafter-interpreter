@@ -107,6 +107,13 @@ func Tokenize(input []byte) ([]string, []string) {
 			} else {
 				tokens = addToken(tokens, EQUAL, string(t), "null")
 			}
+		case '!':
+			if nextMatch(i, input, '=') {
+				tokens = addToken(tokens, BANG_EQUAL, "!=", "null")
+				i += 1
+			} else {
+				tokens = addToken(tokens, BANG, string(t), "null")
+			}
 		case '\n': //ignore line feeds
 		case '\r': //ignore carriage returns
 		default:
