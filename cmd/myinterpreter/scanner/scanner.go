@@ -53,98 +53,142 @@ func (t TokenType) String() string {
 	}[t]
 }
 
-func addToken(tokens []string, tokenType TokenType, lexeme string, literal string) []string {
-	return append(tokens, fmt.Sprintf("%s %s %s", tokenType.String(), lexeme, literal))
+type Scanner struct {
+	source  []byte
+	tokens  []string
+	errors  []string
+	start   int
+	current int
+	line    int
 }
 
-func nextMatch(i int, input []byte, expected byte) bool {
-	if i == (len(input) - 1) {
+func NewScanner(source []byte) *Scanner {
+	return &Scanner{
+		source:  source,
+		tokens:  []string{},
+		errors:  []string{},
+		start:   0,
+		current: 0,
+		line:    1,
+	}
+}
+
+func (s *Scanner) addToken(tokenType TokenType, lexeme string, literal string) {
+	s.tokens = append(s.tokens, fmt.Sprintf("%s %s %s", tokenType.String(), lexeme, literal))
+}
+
+func (s *Scanner) addError(message string) {
+	s.errors = append(s.errors, fmt.Sprintf("[line %d] Error: %s", s.line, message))
+}
+
+func (s *Scanner) nextMatch(expected byte) bool {
+	if s.current == (len(s.source) - 1) {
 		return false
 	}
 
-	if input[i+1] != expected {
+	if s.source[s.current+1] != expected {
 		return false
 	}
 
 	return true
 }
 
-// output: <token_type> <lexeme> <literal>
-func Tokenize(input []byte) ([]string, []string) {
-	var tokens []string
-	var errors []string
+func (s *Scanner) advance() {
+	s.current += 1
+}
 
-	for i := 0; i < len(input); i++ {
-		t := input[i]
+func (s *Scanner) isAtEnd() bool {
+	return s.current >= len(s.source)
+}
+
+func (s *Scanner) isLineBreak() bool {
+	return s.source[s.current] == '\n'
+}
+
+func (s *Scanner) addEOF() {
+	s.tokens = append(s.tokens, "EOF  null")
+}
+
+func (s *Scanner) Tokenize() {
+	for s.current < len(s.source) {
+		t := s.source[s.current]
 
 		switch t {
 		case '(':
-			tokens = addToken(tokens, LEFT_PAREN, string(t), "null")
+			s.addToken(LEFT_PAREN, string(t), "null")
 		case ')':
-			tokens = addToken(tokens, RIGHT_PAREN, string(t), "null")
+			s.addToken(RIGHT_PAREN, string(t), "null")
 		case '{':
-			tokens = addToken(tokens, LEFT_BRACE, string(t), "null")
+			s.addToken(LEFT_BRACE, string(t), "null")
 		case '}':
-			tokens = addToken(tokens, RIGHT_BRACE, string(t), "null")
+			s.addToken(RIGHT_BRACE, string(t), "null")
 		case ',':
-			tokens = addToken(tokens, COMMA, string(t), "null")
+			s.addToken(COMMA, string(t), "null")
 		case '.':
-			tokens = addToken(tokens, DOT, string(t), "null")
+			s.addToken(DOT, string(t), "null")
 		case '-':
-			tokens = addToken(tokens, MINUS, string(t), "null")
+			s.addToken(MINUS, string(t), "null")
 		case '+':
-			tokens = addToken(tokens, PLUS, string(t), "null")
+			s.addToken(PLUS, string(t), "null")
 		case ';':
-			tokens = addToken(tokens, SEMICOLON, string(t), "null")
+			s.addToken(SEMICOLON, string(t), "null")
 		case '*':
-			tokens = addToken(tokens, STAR, string(t), "null")
+			s.addToken(STAR, string(t), "null")
 		case '=':
-			if nextMatch(i, input, '=') {
-				tokens = addToken(tokens, EQUAL_EQUAL, "==", "null")
-				i += 1
+			if s.nextMatch('=') {
+				s.addToken(EQUAL_EQUAL, "==", "null")
+				s.advance()
 			} else {
-				tokens = addToken(tokens, EQUAL, string(t), "null")
+				s.addToken(EQUAL, "==", "null")
 			}
 		case '!':
-			if nextMatch(i, input, '=') {
-				tokens = addToken(tokens, BANG_EQUAL, "!=", "null")
-				i += 1
+			if s.nextMatch('=') {
+				s.addToken(BANG_EQUAL, "!=", "null")
+				s.advance()
 			} else {
-				tokens = addToken(tokens, BANG, string(t), "null")
+				s.addToken(BANG, string(t), "null")
 			}
 		case '<':
-			if nextMatch(i, input, '=') {
-				tokens = addToken(tokens, LESS_EQUAL, "<=", "null")
-				i += 1
+			if s.nextMatch('=') {
+				s.addToken(LESS_EQUAL, "<=", "null")
+				s.advance()
 			} else {
-				tokens = addToken(tokens, LESS, string(t), "null")
+				s.addToken(LESS, string(t), "null")
 			}
 		case '>':
-			if nextMatch(i, input, '=') {
-				tokens = addToken(tokens, GREATER_EQUAL, ">=", "null")
-				i += 1
+			if s.nextMatch('=') {
+				s.addToken(GREATER_EQUAL, ">=", "null")
+				s.advance()
 			} else {
-				tokens = addToken(tokens, GREATER, string(t), "null")
+				s.addToken(GREATER, string(t), "null")
 			}
 		case '/':
-			if nextMatch(i, input, '/') {
+			if s.nextMatch('/') {
 				// it's a comment, ignore the rest of the line
-				for i < len(input) && input[i] != '\n' {
-					i += 1
+				for !s.isAtEnd() && !s.isLineBreak() {
+					s.advance()
 				}
 			} else {
-				tokens = addToken(tokens, SLASH, string(t), "null")
+				s.addToken(SLASH, string(t), "null")
 			}
 		case ' ':
 		case '\t':
 		case '\r': //ignore carriage returns
 		case '\n': //ignore line feeds
 		default:
-			errors = append(errors, fmt.Sprintf("[line 1] Error: Unexpected character: %s", string(t)))
+			s.addError(fmt.Sprintf("Unexpected character: %s", string(t)))
 		}
+
+		s.advance()
 	}
 
-	tokens = append(tokens, "EOF  null")
+	s.addEOF()
+}
 
-	return tokens, errors
+func (s *Scanner) GetTokens() []string {
+	return s.tokens
+}
+
+func (s *Scanner) GetErrors() []string {
+	return s.errors
 }

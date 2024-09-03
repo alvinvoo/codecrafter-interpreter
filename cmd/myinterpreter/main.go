@@ -27,7 +27,10 @@ func main() {
 		os.Exit(1)
 	}
 
-	stringSlice, errorSlice := scanner.Tokenize(fileContents)
+	sc := scanner.NewScanner(fileContents)
+	sc.Tokenize()
+	stringSlice := sc.GetTokens()
+	errorSlice := sc.GetErrors()
 	if len(errorSlice) > 0 {
 		for _, e := range errorSlice {
 			fmt.Fprint(os.Stderr, e+"\n")
