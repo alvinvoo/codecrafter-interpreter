@@ -1,6 +1,8 @@
 package scanner
 
-import "fmt"
+import (
+	"fmt"
+)
 
 type TokenType int
 
@@ -19,7 +21,14 @@ const (
 	STAR
 
 	// One or two character tokens
+	BANG
+	BANG_EQUAL
 	EQUAL
+	EQUAL_EQUAL
+	GREATER
+	GREATER_EQUAL
+	LESS
+	LESS_EQUAL
 
 	// Literals
 	IDENTIFIER
@@ -37,50 +46,72 @@ func (t TokenType) String() string {
 		"LEFT_PAREN", "RIGHT_PAREN",
 		"LEFT_BRACE", "RIGHT_BRACE",
 		"COMMA", "DOT", "MINUS", "PLUS", "SEMICOLON", "SLASH", "STAR",
-		"EQUAL",
+		"BANG", "BANG_EQUAL", "EQUAL", "EQUAL_EQUAL", "GREATER", "GREATER_EQUAL", "LESS", "LESS_EQUAL",
 		"IDENTIFIER", "STRING", "NUMBER",
 		"VAR",
 		"EOF",
 	}[t]
 }
 
+func addToken(tokens []string, tokenType TokenType, lexeme string, literal string) []string {
+	return append(tokens, fmt.Sprintf("%s %s %s", tokenType.String(), lexeme, literal))
+}
+
+func nextMatch(i int, input []byte, expected byte) bool {
+	if i == (len(input) - 1) {
+		return false
+	}
+
+	if input[i+1] != expected {
+		return false
+	}
+
+	return true
+}
+
 // output: <token_type> <lexeme> <literal>
 func Tokenize(input []byte) ([]string, []string) {
 	var tokens []string
 	var errors []string
-	for len(input) > 0 {
-		t := input[0]
+
+	for i := 0; i < len(input); i++ {
+		t := input[i]
 
 		switch t {
 		case '(':
-			tokens = append(tokens, fmt.Sprintf("%s %s null", LEFT_PAREN.String(), string(t)))
+			tokens = addToken(tokens, LEFT_PAREN, string(t), "null")
 		case ')':
-			tokens = append(tokens, fmt.Sprintf("%s %s null", RIGHT_PAREN.String(), string(t)))
+			tokens = addToken(tokens, RIGHT_PAREN, string(t), "null")
 		case '{':
-			tokens = append(tokens, fmt.Sprintf("%s %s null", LEFT_BRACE.String(), string(t)))
+			tokens = addToken(tokens, LEFT_BRACE, string(t), "null")
 		case '}':
-			tokens = append(tokens, fmt.Sprintf("%s %s null", RIGHT_BRACE.String(), string(t)))
+			tokens = addToken(tokens, RIGHT_BRACE, string(t), "null")
 		case ',':
-			tokens = append(tokens, fmt.Sprintf("%s %s null", COMMA.String(), string(t)))
+			tokens = addToken(tokens, COMMA, string(t), "null")
 		case '.':
-			tokens = append(tokens, fmt.Sprintf("%s %s null", DOT.String(), string(t)))
+			tokens = addToken(tokens, DOT, string(t), "null")
 		case '-':
-			tokens = append(tokens, fmt.Sprintf("%s %s null", MINUS.String(), string(t)))
+			tokens = addToken(tokens, MINUS, string(t), "null")
 		case '+':
-			tokens = append(tokens, fmt.Sprintf("%s %s null", PLUS.String(), string(t)))
+			tokens = addToken(tokens, PLUS, string(t), "null")
 		case ';':
-			tokens = append(tokens, fmt.Sprintf("%s %s null", SEMICOLON.String(), string(t)))
+			tokens = addToken(tokens, SEMICOLON, string(t), "null")
 		case '/':
-			tokens = append(tokens, fmt.Sprintf("%s %s null", SLASH.String(), string(t)))
+			tokens = addToken(tokens, SLASH, string(t), "null")
 		case '*':
-			tokens = append(tokens, fmt.Sprintf("%s %s null", STAR.String(), string(t)))
+			tokens = addToken(tokens, STAR, string(t), "null")
+		case '=':
+			if nextMatch(i, input, '=') {
+				tokens = addToken(tokens, EQUAL_EQUAL, "==", "null")
+				i += 1
+			} else {
+				tokens = addToken(tokens, EQUAL, string(t), "null")
+			}
 		case '\n': //ignore line feeds
 		case '\r': //ignore carriage returns
 		default:
 			errors = append(errors, fmt.Sprintf("[line 1] Error: Unexpected character: %s", string(t)))
 		}
-
-		input = input[1:]
 	}
 
 	tokens = append(tokens, "EOF  null")
