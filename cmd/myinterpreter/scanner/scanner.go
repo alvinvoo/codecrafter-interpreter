@@ -115,6 +115,9 @@ func NewScanner(source []byte) *Scanner {
 func (s *Scanner) addToken(tokenType TokenType, lexeme string, literal string) {
 	// TODO: can do improvement of `start` and `current` to keep track of the position of the token
 	s.tokens = append(s.tokens, fmt.Sprintf("%s %s %s", tokenType.String(), lexeme, literal))
+
+	// reset the start position
+	s.start = s.current
 }
 
 func (s *Scanner) addError(message string) {
@@ -286,11 +289,12 @@ func (s *Scanner) Tokenize() {
 					s.advance()
 				}
 
-				keyword, ok := keywords[string(s.source[s.start:s.current+1])]
+				str := string(s.source[s.start : s.current+1])
+				keyword, ok := keywords[str]
 				if ok {
-					s.addToken(keyword, string(s.source[s.start:s.current+1]), "null")
+					s.addToken(keyword, str, "null")
 				} else {
-					s.addToken(IDENTIFIER, string(s.source[s.start:s.current+1]), "null")
+					s.addToken(IDENTIFIER, str, "null")
 				}
 			} else {
 				s.addError(fmt.Sprintf("Unexpected character: %s", string(t)))
