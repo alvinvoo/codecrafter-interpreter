@@ -112,11 +112,34 @@ func NewScanner(source []byte) *Scanner {
 	}
 }
 
-func (s *Scanner) addToken(tokenType TokenType, lexeme string, literal string) {
+func (s *Scanner) addToken(tokenType TokenType) {
 	// TODO: can do improvement of `start` and `current` to keep track of the position of the token
+	lexeme := string(s.source[s.start : s.current+1])
+
+	literal := "null"
+	if tokenType == STRING {
+		literal = lexeme[1 : len(lexeme)-1]
+	}
+
+	if tokenType == NUMBER {
+		num, err := strconv.ParseFloat(lexeme, 64)
+		if err != nil {
+			s.addError(fmt.Sprintf("Error parsing number: %s", lexeme))
+			return
+		}
+		// Separate the integer and fractional parts
+		_, frac := math.Modf(num)
+
+		// If the fractional part is not zero, it's a float
+		if frac != 0 {
+			literal = strconv.FormatFloat(num, 'f', -1, 64)
+		} else {
+			literal = fmt.Sprintf("%.1f", num)
+		}
+	}
+
 	s.tokens = append(s.tokens, fmt.Sprintf("%s %s %s", tokenType.String(), lexeme, literal))
 
-	// reset the start position
 	s.start = s.current
 }
 
@@ -153,30 +176,11 @@ func (s *Scanner) addLine() {
 }
 
 func (s *Scanner) addNumber() {
-	numStr := string(s.source[s.current])
 	for !s.isAtEnd() && (unicode.IsDigit(rune(s.source[s.current+1])) || s.nextMatch('.')) {
 		s.advance()
-		curDigit := s.source[s.current]
-
-		numStr += string(curDigit)
 	}
 
-	num, err := strconv.ParseFloat(numStr, 64)
-	if err != nil {
-		s.addError(fmt.Sprintf("Error parsing number: %s", numStr))
-	}
-
-	var literal string
-	// Separate the integer and fractional parts
-	_, frac := math.Modf(num)
-
-	// If the fractional part is not zero, it's a float
-	if frac != 0 {
-		literal = strconv.FormatFloat(num, 'f', -1, 64)
-	} else {
-		literal = fmt.Sprintf("%.1f", num)
-	}
-	s.addToken(NUMBER, numStr, literal)
+	s.addToken(NUMBER)
 }
 
 func (s *Scanner) isAlpha(c byte) bool {
@@ -202,61 +206,62 @@ func (s *Scanner) Tokenize() {
 
 		switch t {
 		case '(':
-			s.addToken(LEFT_PAREN, string(t), "null")
+			s.addToken(LEFT_PAREN)
 		case ')':
-			s.addToken(RIGHT_PAREN, string(t), "null")
+			s.addToken(RIGHT_PAREN)
 		case '{':
-			s.addToken(LEFT_BRACE, string(t), "null")
+			s.addToken(LEFT_BRACE)
 		case '}':
-			s.addToken(RIGHT_BRACE, string(t), "null")
+			s.addToken(RIGHT_BRACE)
 		case ',':
-			s.addToken(COMMA, string(t), "null")
+			s.addToken(COMMA)
 		case '.':
-			s.addToken(DOT, string(t), "null")
+			s.addToken(DOT)
 		case '-':
-			s.addToken(MINUS, string(t), "null")
+			s.addToken(MINUS)
 		case '+':
-			s.addToken(PLUS, string(t), "null")
+			s.addToken(PLUS)
 		case ';':
-			s.addToken(SEMICOLON, string(t), "null")
+			s.addToken(SEMICOLON)
 		case '*':
-			s.addToken(STAR, string(t), "null")
+			s.addToken(STAR)
 		case '=':
 			if s.nextMatch('=') {
-				s.addToken(EQUAL_EQUAL, "==", "null")
 				s.advance()
+				s.addToken(EQUAL_EQUAL)
 			} else {
-				s.addToken(EQUAL, "=", "null")
+				s.addToken(EQUAL)
 			}
 		case '!':
 			if s.nextMatch('=') {
-				s.addToken(BANG_EQUAL, "!=", "null")
 				s.advance()
+				s.addToken(BANG_EQUAL)
 			} else {
-				s.addToken(BANG, string(t), "null")
+				s.addToken(BANG)
 			}
 		case '<':
 			if s.nextMatch('=') {
-				s.addToken(LESS_EQUAL, "<=", "null")
 				s.advance()
+				s.addToken(LESS_EQUAL)
 			} else {
-				s.addToken(LESS, string(t), "null")
+				s.addToken(LESS)
 			}
 		case '>':
 			if s.nextMatch('=') {
-				s.addToken(GREATER_EQUAL, ">=", "null")
 				s.advance()
+				s.addToken(GREATER_EQUAL)
 			} else {
-				s.addToken(GREATER, string(t), "null")
+				s.addToken(GREATER)
 			}
 		case '/':
 			if s.nextMatch('/') {
 				// it's a comment, ignore the rest of the line
 				for !s.isAtEnd() && !s.nextMatch('\n') {
-					s.advance()
+					s.start += 1
+					s.current += 1
 				}
 			} else {
-				s.addToken(SLASH, string(t), "null")
+				s.addToken(SLASH)
 			}
 		case '"':
 			s.start = s.current
@@ -272,8 +277,7 @@ func (s *Scanner) Tokenize() {
 			// if closing quote matches
 			if s.nextMatch('"') {
 				s.advance()
-				fullStr := string(s.source[s.start+1 : s.current])
-				s.addToken(STRING, fmt.Sprintf("\"%s\"", fullStr), fullStr)
+				s.addToken(STRING)
 			}
 		case ' ': //ignore whitespace
 		case '\t': //ignore tab
@@ -284,24 +288,24 @@ func (s *Scanner) Tokenize() {
 			if unicode.IsDigit(rune(t)) {
 				s.addNumber()
 			} else if s.isAlpha(t) {
-				s.start = s.current
 				for s.isAlphaNumeric(s.peek()) {
 					s.advance()
 				}
 
-				str := string(s.source[s.start : s.current+1])
-				keyword, ok := keywords[str]
+				keyword, ok := keywords[string(s.source[s.start:s.current+1])]
 				if ok {
-					s.addToken(keyword, str, "null")
+					s.addToken(keyword)
 				} else {
-					s.addToken(IDENTIFIER, str, "null")
+					s.addToken(IDENTIFIER)
 				}
 			} else {
 				s.addError(fmt.Sprintf("Unexpected character: %s", string(t)))
 			}
 		}
 
-		s.advance()
+		// s.advance()
+		s.start += 1
+		s.current += 1
 	}
 
 	s.addEOF()
