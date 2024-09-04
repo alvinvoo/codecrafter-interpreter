@@ -109,6 +109,7 @@ func (s *Scanner) addLine() {
 	s.line += 1
 }
 
+// format: <TOKEN_TYPE> <LEXEME> <LITERAL>
 func (s *Scanner) Tokenize() {
 	for s.current < len(s.source) {
 		t := s.source[s.current]
@@ -171,6 +172,20 @@ func (s *Scanner) Tokenize() {
 			} else {
 				s.addToken(SLASH, string(t), "null")
 			}
+		case '"':
+			s.start = s.current
+			for !s.nextMatch('"') {
+				if s.isAtEnd() || s.nextMatch('\n') {
+					s.addError("Unterminated string.")
+					return
+				}
+				s.advance()
+			}
+
+			s.advance()
+
+			fullStr := string(s.source[s.start+1 : s.current])
+			s.addToken(STRING, fmt.Sprintf("\"%s\"", fullStr), fullStr)
 		case ' ': //ignore whitespace
 		case '\t': //ignore tab
 		case '\r': //ignore carriage returns
