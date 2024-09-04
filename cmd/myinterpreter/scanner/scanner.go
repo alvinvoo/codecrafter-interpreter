@@ -169,7 +169,7 @@ func (s *Scanner) addNumber() {
 
 	// If the fractional part is not zero, it's a float
 	if frac != 0 {
-		literal = numStr
+		literal = strconv.FormatFloat(num, 'f', -1, 64)
 	} else {
 		literal = fmt.Sprintf("%.1f", num)
 	}
