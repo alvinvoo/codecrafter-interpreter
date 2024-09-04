@@ -113,7 +113,6 @@ func NewScanner(source []byte) *Scanner {
 }
 
 func (s *Scanner) addToken(tokenType TokenType) {
-	// TODO: can do improvement of `start` and `current` to keep track of the position of the token
 	lexeme := string(s.source[s.start : s.current+1])
 
 	literal := "null"
@@ -264,7 +263,6 @@ func (s *Scanner) Tokenize() {
 				s.addToken(SLASH)
 			}
 		case '"':
-			s.start = s.current
 			// as long as cannot find closing quote
 			for !s.nextMatch('"') {
 				if s.isAtEnd() || s.nextMatch('\n') {
