@@ -177,15 +177,16 @@ func (s *Scanner) Tokenize() {
 			for !s.nextMatch('"') {
 				if s.isAtEnd() || s.nextMatch('\n') {
 					s.addError("Unterminated string.")
-					return
+					break
 				}
 				s.advance()
 			}
 
-			s.advance()
-
-			fullStr := string(s.source[s.start+1 : s.current])
-			s.addToken(STRING, fmt.Sprintf("\"%s\"", fullStr), fullStr)
+			if s.nextMatch('"') {
+				s.advance()
+				fullStr := string(s.source[s.start+1 : s.current])
+				s.addToken(STRING, fmt.Sprintf("\"%s\"", fullStr), fullStr)
+			}
 		case ' ': //ignore whitespace
 		case '\t': //ignore tab
 		case '\r': //ignore carriage returns
