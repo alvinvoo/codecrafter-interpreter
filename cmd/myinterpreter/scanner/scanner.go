@@ -2,6 +2,7 @@ package scanner
 
 import (
 	"fmt"
+	"math"
 	"strconv"
 	"unicode"
 )
@@ -150,14 +151,9 @@ func (s *Scanner) addLine() {
 
 func (s *Scanner) addNumber() {
 	numStr := string(s.source[s.current])
-	isFraction := false
 	for !s.isAtEnd() && (unicode.IsDigit(rune(s.source[s.current+1])) || s.nextMatch('.')) {
 		s.advance()
 		curDigit := s.source[s.current]
-
-		if curDigit == '.' {
-			isFraction = true
-		}
 
 		numStr += string(curDigit)
 	}
@@ -168,7 +164,11 @@ func (s *Scanner) addNumber() {
 	}
 
 	var literal string
-	if isFraction {
+	// Separate the integer and fractional parts
+	_, frac := math.Modf(num)
+
+	// If the fractional part is not zero, it's a float
+	if frac != 0 {
 		literal = numStr
 	} else {
 		literal = fmt.Sprintf("%.1f", num)
