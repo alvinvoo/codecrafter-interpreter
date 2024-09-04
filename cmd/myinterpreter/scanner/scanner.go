@@ -38,10 +38,45 @@ const (
 	NUMBER
 
 	// Keywords
+	AND
+	CLASS
+	ELSE
+	FALSE
+	FUN
+	FOR
+	IF
+	NIL
+	OR
+
+	PRINT
+	RETURN
+	SUPER
+	THIS
+	TRUE
 	VAR
+	WHILE
 
 	EOF
 )
+
+var keywords = map[string]TokenType{
+	"and":    AND,
+	"class":  CLASS,
+	"else":   ELSE,
+	"false":  FALSE,
+	"for":    FOR,
+	"fun":    FUN,
+	"if":     IF,
+	"nil":    NIL,
+	"or":     OR,
+	"print":  PRINT,
+	"return": RETURN,
+	"super":  SUPER,
+	"this":   THIS,
+	"true":   TRUE,
+	"var":    VAR,
+	"while":  WHILE,
+}
 
 func (t TokenType) String() string {
 	return [...]string{
@@ -50,7 +85,8 @@ func (t TokenType) String() string {
 		"COMMA", "DOT", "MINUS", "PLUS", "SEMICOLON", "SLASH", "STAR",
 		"BANG", "BANG_EQUAL", "EQUAL", "EQUAL_EQUAL", "GREATER", "GREATER_EQUAL", "LESS", "LESS_EQUAL",
 		"IDENTIFIER", "STRING", "NUMBER",
-		"VAR",
+		"AND", "CLASS", "ELSE", "FALSE", "FUN", "FOR", "IF", "NIL", "OR",
+		"PRINT", "RETURN", "SUPER", "THIS", "TRUE", "VAR", "WHILE",
 		"EOF",
 	}[t]
 }
@@ -76,6 +112,7 @@ func NewScanner(source []byte) *Scanner {
 }
 
 func (s *Scanner) addToken(tokenType TokenType, lexeme string, literal string) {
+	// TODO: can do improvement of `start` and `current` to keep track of the position of the token
 	s.tokens = append(s.tokens, fmt.Sprintf("%s %s %s", tokenType.String(), lexeme, literal))
 }
 
@@ -109,6 +146,50 @@ func (s *Scanner) addEOF() {
 
 func (s *Scanner) addLine() {
 	s.line += 1
+}
+
+func (s *Scanner) addNumber() {
+	numStr := string(s.source[s.current])
+	isFraction := false
+	for !s.isAtEnd() && (unicode.IsDigit(rune(s.source[s.current+1])) || s.nextMatch('.')) {
+		s.advance()
+		curDigit := s.source[s.current]
+
+		if curDigit == '.' {
+			isFraction = true
+		}
+
+		numStr += string(curDigit)
+	}
+
+	num, err := strconv.ParseFloat(numStr, 64)
+	if err != nil {
+		s.addError(fmt.Sprintf("Error parsing number: %s", numStr))
+	}
+
+	var literal string
+	if isFraction {
+		literal = numStr
+	} else {
+		literal = fmt.Sprintf("%.1f", num)
+	}
+	s.addToken(NUMBER, numStr, literal)
+}
+
+func (s *Scanner) isAlpha(c byte) bool {
+	return unicode.IsLetter(rune(c)) || c == '_'
+}
+
+func (s *Scanner) isAlphaNumeric(c byte) bool {
+	return s.isAlpha(c) || unicode.IsDigit(rune(c))
+}
+
+func (s *Scanner) peek() byte {
+	if s.isAtEnd() {
+		return 0
+	}
+
+	return s.source[s.current+1]
 }
 
 // format: <TOKEN_TYPE> <LEXEME> <LITERAL>
@@ -198,31 +279,20 @@ func (s *Scanner) Tokenize() {
 			s.addLine()
 		default:
 			if unicode.IsDigit(rune(t)) {
-				numStr := string(t)
-				isFraction := false
-				for !s.isAtEnd() && (unicode.IsDigit(rune(s.source[s.current+1])) || s.nextMatch('.')) {
+				s.addNumber()
+			} else if s.isAlpha(t) {
+				s.start = s.current
+				for s.isAlphaNumeric(s.peek()) {
 					s.advance()
-					curDigit := s.source[s.current]
-
-					if curDigit == '.' {
-						isFraction = true
-					}
-
-					numStr += string(curDigit)
 				}
 
-				num, err := strconv.ParseFloat(numStr, 64)
-				if err != nil {
-					s.addError(fmt.Sprintf("Error parsing number: %s", numStr))
-				}
-
-				var literal string
-				if isFraction {
-					literal = numStr
+				s.advance()
+				keyword, ok := keywords[string(s.source[s.start:s.current])]
+				if ok {
+					s.addToken(keyword, string(s.source[s.start:s.current]), "null")
 				} else {
-					literal = fmt.Sprintf("%.1f", num)
+					s.addToken(IDENTIFIER, string(s.source[s.start:s.current]), "null")
 				}
-				s.addToken(NUMBER, numStr, literal)
 			} else {
 				s.addError(fmt.Sprintf("Unexpected character: %s", string(t)))
 			}
