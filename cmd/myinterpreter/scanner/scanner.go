@@ -2,6 +2,8 @@ package scanner
 
 import (
 	"fmt"
+	"strconv"
+	"unicode"
 )
 
 type TokenType int
@@ -174,6 +176,7 @@ func (s *Scanner) Tokenize() {
 			}
 		case '"':
 			s.start = s.current
+			// as long as cannot find closing quote
 			for !s.nextMatch('"') {
 				if s.isAtEnd() || s.nextMatch('\n') {
 					s.addError("Unterminated string.")
@@ -182,6 +185,7 @@ func (s *Scanner) Tokenize() {
 				s.advance()
 			}
 
+			// if closing quote matches
 			if s.nextMatch('"') {
 				s.advance()
 				fullStr := string(s.source[s.start+1 : s.current])
@@ -193,7 +197,35 @@ func (s *Scanner) Tokenize() {
 		case '\n':
 			s.addLine()
 		default:
-			s.addError(fmt.Sprintf("Unexpected character: %s", string(t)))
+			if unicode.IsDigit(rune(t)) {
+				numStr := string(t)
+				isFraction := false
+				for !s.isAtEnd() && (unicode.IsDigit(rune(s.source[s.current+1])) || s.nextMatch('.')) {
+					s.advance()
+					curDigit := s.source[s.current]
+
+					if curDigit == '.' {
+						isFraction = true
+					}
+
+					numStr += string(curDigit)
+				}
+
+				num, err := strconv.ParseFloat(numStr, 64)
+				if err != nil {
+					s.addError(fmt.Sprintf("Error parsing number: %s", numStr))
+				}
+
+				var literal string
+				if isFraction {
+					literal = numStr
+				} else {
+					literal = fmt.Sprintf("%.1f", num)
+				}
+				s.addToken(NUMBER, numStr, literal)
+			} else {
+				s.addError(fmt.Sprintf("Unexpected character: %s", string(t)))
+			}
 		}
 
 		s.advance()
