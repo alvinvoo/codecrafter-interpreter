@@ -286,12 +286,11 @@ func (s *Scanner) Tokenize() {
 					s.advance()
 				}
 
-				s.advance()
-				keyword, ok := keywords[string(s.source[s.start:s.current])]
+				keyword, ok := keywords[string(s.source[s.start:s.current+1])]
 				if ok {
-					s.addToken(keyword, string(s.source[s.start:s.current]), "null")
+					s.addToken(keyword, string(s.source[s.start:s.current+1]), "null")
 				} else {
-					s.addToken(IDENTIFIER, string(s.source[s.start:s.current]), "null")
+					s.addToken(IDENTIFIER, string(s.source[s.start:s.current+1]), "null")
 				}
 			} else {
 				s.addError(fmt.Sprintf("Unexpected character: %s", string(t)))
