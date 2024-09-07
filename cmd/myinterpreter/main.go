@@ -45,31 +45,43 @@ func main() {
 		}
 	} else if command == "parse" {
 		filename := os.Args[2]
-		_, err := os.ReadFile(filename)
+		fileContents, err := os.ReadFile(filename)
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "Error reading file: %v\n", err)
 			os.Exit(1)
 		}
 
+		sc := scanner.NewScanner(fileContents)
+		sc.Tokenize()
+		tokens := sc.GetTokens()
+		errorSlice := sc.GetErrors()
+		if len(errorSlice) > 0 {
+			for _, e := range errorSlice {
+				fmt.Fprint(os.Stderr, e+"\n")
+			}
+		} else {
+			p := parser.NewParser(tokens)
+			expr := p.Parse()
+			fmt.Println(parser.NewAstPrinter().Print(expr))
+		}
 	} else if command == "parse_test" {
 		b := parser.NewBinary(
-			parser.NewLiteral("1"),
+			parser.NewLiteral(1),
 			scanner.NewToken(scanner.PLUS, "+", ""),
-			parser.NewLiteral("2"),
+			parser.NewLiteral(2),
 		)
 
 		c := parser.NewBinary(
 			parser.NewUnary(
 				scanner.NewToken(scanner.MINUS, "-", "null"),
-				parser.NewLiteral("123"),
+				parser.NewLiteral(123),
 			),
 			scanner.NewToken(scanner.STAR, "*", "null"),
-			parser.NewGrouping(parser.NewLiteral("45")),
+			parser.NewGrouping(parser.NewLiteral(45.67)),
 		)
 
 		fmt.Println(parser.NewAstPrinter().Print(b))
 		fmt.Println(parser.NewAstPrinter().Print(c))
-
 	} else {
 		fmt.Fprintf(os.Stderr, "Unknown command: %s\n", command)
 		os.Exit(1)

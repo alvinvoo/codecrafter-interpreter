@@ -1,5 +1,7 @@
 package parser
 
+import "fmt"
+
 type AstPrinter struct{}
 
 func NewAstPrinter() *AstPrinter {
@@ -22,14 +24,15 @@ func (ap AstPrinter) Print(expr Expr) string {
 	return expr.Accept(ap).(string)
 }
 
+// literal        → NUMBER | STRING | "true" | "false" | "nil" ;
 func (ap AstPrinter) visitLiteralExpr(l Expr) interface{} {
 	var ret string
 	if ll, ok := l.(Literal); ok {
 		if ll.Value == nil {
 			ret = "nil"
+		} else {
+			ret = fmt.Sprintf("%v", ll.Value)
 		}
-
-		ret = ll.Value.(string)
 	}
 
 	return ret

@@ -6,7 +6,7 @@ import (
 	"github.com/codecrafters-io/interpreter-starter-go/cmd/myinterpreter/scanner"
 )
 
-func TestParser(t *testing.T) {
+func TestExpression(t *testing.T) {
 	b := NewBinary(
 		NewLiteral("1"),
 		scanner.NewToken(scanner.PLUS, "+", ""),
@@ -15,10 +15,10 @@ func TestParser(t *testing.T) {
 	c := NewBinary(
 		NewUnary(
 			scanner.NewToken(scanner.MINUS, "-", "null"),
-			NewLiteral("123"),
+			NewLiteral(123),
 		),
 		scanner.NewToken(scanner.STAR, "*", "null"),
-		NewGrouping(NewLiteral("45")),
+		NewGrouping(NewLiteral(45.67)),
 	)
 
 	tests := []struct {
@@ -27,7 +27,7 @@ func TestParser(t *testing.T) {
 	}{
 		{
 			expr: c,
-			want: "(* (- 123) (group 45))",
+			want: "(* (- 123) (group 45.67))",
 		},
 		{
 			expr: b,
@@ -37,11 +37,11 @@ func TestParser(t *testing.T) {
 
 	for _, test := range tests {
 		if test.expr.Accept(NewAstPrinter()).(string) == "" {
-			t.Errorf("Parser() = %q, want non-empty string", test.expr.Accept(NewAstPrinter()).(string))
+			t.Errorf("Expression() = %q, want non-empty string", test.expr.Accept(NewAstPrinter()).(string))
 		}
 
 		if test.expr.Accept(NewAstPrinter()).(string) != test.want {
-			t.Errorf("Parser() = %q, want %q", test.expr.Accept(NewAstPrinter()).(string), test.want)
+			t.Errorf("Expression() = %q, want %q", test.expr.Accept(NewAstPrinter()).(string), test.want)
 		}
 	}
 }

@@ -95,7 +95,7 @@ func (t TokenType) String() string {
 type Token struct {
 	TokenType TokenType
 	Lexeme    string
-	Literal   string
+	Literal   interface{}
 }
 
 func NewToken(tokenType TokenType, lexeme string, literal string) Token {
