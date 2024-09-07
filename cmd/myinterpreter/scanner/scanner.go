@@ -92,9 +92,19 @@ func (t TokenType) String() string {
 	}[t]
 }
 
+type Token struct {
+	TokenType TokenType
+	Lexeme    string
+	Literal   string
+}
+
+func NewToken(tokenType TokenType, lexeme string, literal string) Token {
+	return Token{TokenType: tokenType, Lexeme: lexeme, Literal: literal}
+}
+
 type Scanner struct {
 	source  []byte
-	tokens  []string
+	tokens  []Token
 	errors  []string
 	start   int
 	current int
@@ -104,7 +114,7 @@ type Scanner struct {
 func NewScanner(source []byte) *Scanner {
 	return &Scanner{
 		source:  source,
-		tokens:  []string{},
+		tokens:  []Token{},
 		errors:  []string{},
 		start:   0,
 		current: 0,
@@ -137,7 +147,7 @@ func (s *Scanner) addToken(tokenType TokenType) {
 		}
 	}
 
-	s.tokens = append(s.tokens, fmt.Sprintf("%s %s %s", tokenType.String(), lexeme, literal))
+	s.tokens = append(s.tokens, Token{TokenType: tokenType, Lexeme: lexeme, Literal: literal})
 
 	s.start = s.current
 }
@@ -167,7 +177,7 @@ func (s *Scanner) advance() {
 }
 
 func (s *Scanner) addEOF() {
-	s.tokens = append(s.tokens, "EOF  null")
+	s.tokens = append(s.tokens, Token{TokenType: EOF, Lexeme: "", Literal: "null"})
 }
 
 func (s *Scanner) addLine() {
@@ -198,7 +208,7 @@ func (s *Scanner) peek() byte {
 	return s.source[s.current+1]
 }
 
-// format: <TOKEN_TYPE> <LEXEME> <LITERAL>
+// token format: <TOKEN_TYPE> <LEXEME> <LITERAL>
 func (s *Scanner) Tokenize() {
 	for s.current < len(s.source) {
 		t := s.source[s.current]
@@ -309,8 +319,17 @@ func (s *Scanner) Tokenize() {
 	s.addEOF()
 }
 
-func (s *Scanner) GetTokens() []string {
+func (s *Scanner) GetTokens() []Token {
 	return s.tokens
+}
+
+func (s *Scanner) GetTokensString() []string {
+	tokens := []string{}
+	for _, t := range s.tokens {
+		tokens = append(tokens, fmt.Sprintf("%s %s %s", t.TokenType.String(), t.Lexeme, t.Literal))
+	}
+
+	return tokens
 }
 
 func (s *Scanner) GetErrors() []string {
