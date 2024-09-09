@@ -63,8 +63,8 @@ func main() {
 			p := parser.NewParser(tokens)
 			expr, err := p.Parse()
 			if err != nil {
-				fmt.Fprintf(os.Stderr, "Error parsing: %v\n", err)
-				os.Exit(1)
+				fmt.Fprintf(os.Stderr, "%v\n", err)
+				os.Exit(65)
 			}
 
 			fmt.Println(parser.NewAstPrinter().Print(expr))

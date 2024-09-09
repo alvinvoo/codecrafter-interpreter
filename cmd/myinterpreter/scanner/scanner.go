@@ -96,10 +96,11 @@ type Token struct {
 	TokenType TokenType
 	Lexeme    string
 	Literal   interface{}
+	Line      int
 }
 
 func NewToken(tokenType TokenType, lexeme string, literal string) Token {
-	return Token{TokenType: tokenType, Lexeme: lexeme, Literal: literal}
+	return Token{TokenType: tokenType, Lexeme: lexeme, Literal: literal, Line: 1}
 }
 
 type Scanner struct {
@@ -147,7 +148,7 @@ func (s *Scanner) addToken(tokenType TokenType) {
 		}
 	}
 
-	s.tokens = append(s.tokens, Token{TokenType: tokenType, Lexeme: lexeme, Literal: literal})
+	s.tokens = append(s.tokens, Token{TokenType: tokenType, Lexeme: lexeme, Literal: literal, Line: s.line})
 
 	s.start = s.current
 }
@@ -177,7 +178,7 @@ func (s *Scanner) advance() {
 }
 
 func (s *Scanner) addEOF() {
-	s.tokens = append(s.tokens, Token{TokenType: EOF, Lexeme: "", Literal: "null"})
+	s.tokens = append(s.tokens, Token{TokenType: EOF, Lexeme: "", Literal: "null", Line: s.line})
 }
 
 func (s *Scanner) addLine() {

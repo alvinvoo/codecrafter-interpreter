@@ -188,7 +188,7 @@ func (p *Parser) primary() (Expr, error) {
 
 	if p.matchAny(scanner.NIL) {
 		return NewLiteral(nil), nil
-	}
+	
 
 	if p.matchAny(scanner.NUMBER, scanner.STRING) {
 		return NewLiteral(p.previous().Literal), nil
@@ -208,7 +208,7 @@ func (p *Parser) primary() (Expr, error) {
 		return NewGrouping(expr), nil
 	}
 
-	return NewLiteral(nil), fmt.Errorf("no primary expression found")
+	return NewLiteral(nil), fmt.Errorf(Error(p.peek(), "Expect expression"))
 }
 
 func (p *Parser) Parse() (Expr, error) {
