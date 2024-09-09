@@ -188,7 +188,7 @@ func (p *Parser) primary() (Expr, error) {
 
 	if p.matchAny(scanner.NIL) {
 		return NewLiteral(nil), nil
-	
+	}
 
 	if p.matchAny(scanner.NUMBER, scanner.STRING) {
 		return NewLiteral(p.previous().Literal), nil
