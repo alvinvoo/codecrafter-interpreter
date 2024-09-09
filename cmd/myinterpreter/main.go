@@ -61,7 +61,12 @@ func main() {
 			}
 		} else {
 			p := parser.NewParser(tokens)
-			expr := p.Parse()
+			expr, err := p.Parse()
+			if err != nil {
+				fmt.Fprintf(os.Stderr, "Error parsing: %v\n", err)
+				os.Exit(1)
+			}
+
 			fmt.Println(parser.NewAstPrinter().Print(expr))
 		}
 	} else if command == "parse_test" {

@@ -23,6 +23,8 @@ primary        → NUMBER | STRING | "true" | "false" | "nil"
 */
 
 import (
+	"fmt"
+
 	"github.com/codecrafters-io/interpreter-starter-go/cmd/myinterpreter/scanner"
 )
 
@@ -63,6 +65,7 @@ func (p *Parser) previous() scanner.Token {
 	return p.tokens[p.current-1]
 }
 
+// matchAny will also advance the token if it matches
 func (p *Parser) matchAny(types ...scanner.TokenType) bool {
 	for _, t := range types {
 		if p.check(t) {
@@ -74,30 +77,52 @@ func (p *Parser) matchAny(types ...scanner.TokenType) bool {
 	return false
 }
 
-func (p *Parser) expression() Expr {
+func (p *Parser) expression() (Expr, error) {
 	return p.primary()
 }
 
-func (p *Parser) primary() Expr {
+func (p *Parser) consume(t scanner.TokenType, expectedTokenMsg string) (scanner.Token, error) {
+	if p.check(t) {
+		return p.advance(), nil
+	}
+
+	return scanner.Token{}, fmt.Errorf("expect '%s' after expression", expectedTokenMsg)
+}
+
+func (p *Parser) primary() (Expr, error) {
 	if p.matchAny(scanner.FALSE) {
-		return NewLiteral(false)
+		return NewLiteral(false), nil
 	}
 
 	if p.matchAny(scanner.TRUE) {
-		return NewLiteral(true)
+		return NewLiteral(true), nil
 	}
 
 	if p.matchAny(scanner.NIL) {
-		return NewLiteral(nil)
+		return NewLiteral(nil), nil
 	}
 
 	if p.matchAny(scanner.NUMBER, scanner.STRING) {
-		return NewLiteral(p.previous().Literal)
+		return NewLiteral(p.previous().Literal), nil
 	}
 
-	return NewLiteral(nil)
+	if p.matchAny(scanner.LEFT_PAREN) {
+		expr, err := p.expression()
+		if err != nil {
+			return NewLiteral(nil), err
+		}
+
+		_, err = p.consume(scanner.RIGHT_PAREN, ")")
+		if err != nil {
+			return NewLiteral(nil), err
+		}
+
+		return NewGrouping(expr), nil
+	}
+
+	return NewLiteral(nil), fmt.Errorf("no primary expression found")
 }
 
-func (p *Parser) Parse() Expr {
+func (p *Parser) Parse() (Expr, error) {
 	return p.expression()
 }
