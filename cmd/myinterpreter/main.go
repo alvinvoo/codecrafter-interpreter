@@ -59,6 +59,7 @@ func main() {
 			for _, e := range errorSlice {
 				fmt.Fprint(os.Stderr, e+"\n")
 			}
+			os.Exit(65)
 		} else {
 			p := parser.NewParser(tokens)
 			expr, err := p.Parse()
