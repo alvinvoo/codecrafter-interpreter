@@ -84,7 +84,26 @@ func (p *Parser) consume(t scanner.TokenType, expectedTokenMsg string) (scanner.
 }
 
 func (p *Parser) expression() (Expr, error) {
-	return p.unary()
+	return p.factor()
+}
+
+func (p *Parser) factor() (Expr, error) {
+	expr, err := p.unary()
+	if err != nil {
+		return NewLiteral(nil), err
+	}
+
+	for p.matchAny(scanner.SLASH, scanner.STAR) {
+		operator := p.previous()
+		right, err := p.unary()
+		if err != nil {
+			return NewLiteral(nil), err
+		}
+
+		expr = NewBinary(expr, operator, right)
+	}
+
+	return expr, nil
 }
 
 func (p *Parser) unary() (Expr, error) {
