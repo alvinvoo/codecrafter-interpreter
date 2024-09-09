@@ -16,10 +16,8 @@ equality       → comparison ( ( "!=" | "==" ) comparison )* ;
 comparison     → term ( ( ">" | ">=" | "<" | "<=" ) term )* ;
 term           → factor ( ( "-" | "+" ) factor )* ; // * means zero or more
 factor         → unary ( ( "/" | "*" ) unary )* ;
-unary          → ( "!" | "-" ) unary
-               | primary ;
-primary        → NUMBER | STRING | "true" | "false" | "nil"
-               | "(" expression ")"
+unary          → ( "!" | "-" ) unary | primary ;
+primary        → NUMBER | STRING | "true" | "false" | "nil" | "(" expression ")"
 */
 
 import (
