@@ -75,16 +75,30 @@ func (p *Parser) matchAny(types ...scanner.TokenType) bool {
 	return false
 }
 
-func (p *Parser) expression() (Expr, error) {
-	return p.primary()
-}
-
 func (p *Parser) consume(t scanner.TokenType, expectedTokenMsg string) (scanner.Token, error) {
 	if p.check(t) {
 		return p.advance(), nil
 	}
 
 	return scanner.Token{}, fmt.Errorf("expect '%s' after expression", expectedTokenMsg)
+}
+
+func (p *Parser) expression() (Expr, error) {
+	return p.unary()
+}
+
+func (p *Parser) unary() (Expr, error) {
+	if p.matchAny(scanner.BANG, scanner.MINUS) {
+		operator := p.previous()
+		right, err := p.unary()
+		if err != nil {
+			return NewLiteral(nil), err
+		}
+
+		return NewUnary(operator, right), nil
+	}
+
+	return p.primary()
 }
 
 func (p *Parser) primary() (Expr, error) {
