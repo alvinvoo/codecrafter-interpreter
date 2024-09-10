@@ -50,7 +50,7 @@ func (ap AstPrinter) visitGroupingExpr(g Expr) interface{} {
 func (ap AstPrinter) visitUnaryExpr(u Expr) interface{} {
 	var ret string
 	if uu, ok := u.(Unary); ok {
-		ret = ap.parenthesize(uu.Token.Lexeme, uu.Expression)
+		ret = ap.parenthesize(uu.Operator.Lexeme, uu.Right)
 	}
 
 	return ret

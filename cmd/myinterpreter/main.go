@@ -8,6 +8,27 @@ import (
 	"github.com/codecrafters-io/interpreter-starter-go/cmd/myinterpreter/scanner"
 )
 
+func readFileAndScan(filename string) []scanner.Token {
+	fileContents, err := os.ReadFile(filename)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Error reading file: %v\n", err)
+		os.Exit(1)
+	}
+
+	sc := scanner.NewScanner(fileContents)
+	sc.Tokenize()
+	tokens := sc.GetTokens()
+	errorSlice := sc.GetErrors()
+	if len(errorSlice) > 0 {
+		for _, e := range errorSlice {
+			fmt.Fprint(os.Stderr, e+"\n")
+		}
+		os.Exit(65)
+	}
+
+	return tokens
+}
+
 func main() {
 	if len(os.Args) < 3 {
 		fmt.Fprintln(os.Stderr, "Usage: ./your_program.sh tokenize <filename>")
@@ -44,32 +65,39 @@ func main() {
 			os.Exit(0)
 		}
 	} else if command == "parse" {
-		filename := os.Args[2]
-		fileContents, err := os.ReadFile(filename)
+		tokens := readFileAndScan(os.Args[2])
+		if len(tokens) == 0 {
+			fmt.Println("No tokens found")
+			os.Exit(0)
+		}
+
+		p := parser.NewParser(tokens)
+		expr, err := p.Parse()
 		if err != nil {
-			fmt.Fprintf(os.Stderr, "Error reading file: %v\n", err)
-			os.Exit(1)
-		}
-
-		sc := scanner.NewScanner(fileContents)
-		sc.Tokenize()
-		tokens := sc.GetTokens()
-		errorSlice := sc.GetErrors()
-		if len(errorSlice) > 0 {
-			for _, e := range errorSlice {
-				fmt.Fprint(os.Stderr, e+"\n")
-			}
+			fmt.Fprintf(os.Stderr, "%v\n", err)
 			os.Exit(65)
-		} else {
-			p := parser.NewParser(tokens)
-			expr, err := p.Parse()
-			if err != nil {
-				fmt.Fprintf(os.Stderr, "%v\n", err)
-				os.Exit(65)
-			}
-
-			fmt.Println(parser.NewAstPrinter().Print(expr))
 		}
+
+		fmt.Println(parser.NewAstPrinter().Print(expr))
+	} else if command == "evaluate" {
+		tokens := readFileAndScan(os.Args[2])
+		if len(tokens) == 0 {
+			fmt.Println("No tokens found")
+			os.Exit(0)
+		}
+
+		p := parser.NewParser(tokens)
+		expr, err := p.Parse()
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "%v\n", err)
+			os.Exit(65)
+
+		}
+
+		interpreter := parser.NewInterpreter()
+		values := interpreter.Evaluate(expr)
+
+		fmt.Println(values)
 	} else if command == "parse_test" {
 		b := parser.NewBinary(
 			parser.NewLiteral(1),

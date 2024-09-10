@@ -57,12 +57,12 @@ func (g Grouping) Accept(v Visitor) interface{} {
 }
 
 type Unary struct {
-	Token      scanner.Token
-	Expression Expr
+	Operator scanner.Token
+	Right    Expr
 }
 
-func NewUnary(token scanner.Token, expression Expr) Unary {
-	return Unary{Token: token, Expression: expression}
+func NewUnary(operator scanner.Token, right Expr) Unary {
+	return Unary{Operator: operator, Right: right}
 }
 
 func (u Unary) Accept(v Visitor) interface{} {

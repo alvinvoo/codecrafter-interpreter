@@ -212,5 +212,7 @@ func (p *Parser) primary() (Expr, error) {
 }
 
 func (p *Parser) Parse() (Expr, error) {
+	// TODO: rn only parse one line
+	// need to for !isAtEnd, then add to a list of expressions
 	return p.expression()
 }
