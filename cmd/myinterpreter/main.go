@@ -99,7 +99,7 @@ func main() {
 		if values == nil {
 			fmt.Println("nil")
 		} else {
-			fmt.Println(values)
+			fmt.Printf("%v", values)
 		}
 	} else if command == "parse_test" {
 		b := parser.NewBinary(

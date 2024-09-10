@@ -126,7 +126,8 @@ func NewScanner(source []byte) *Scanner {
 func (s *Scanner) addToken(tokenType TokenType) {
 	lexeme := string(s.source[s.start : s.current+1])
 
-	literal := "null"
+	var literal interface{}
+	literal = nil
 	if tokenType == STRING {
 		literal = lexeme[1 : len(lexeme)-1]
 	}
@@ -137,15 +138,8 @@ func (s *Scanner) addToken(tokenType TokenType) {
 			s.addError(fmt.Sprintf("Error parsing number: %s", lexeme))
 			return
 		}
-		// Separate the integer and fractional parts
-		_, frac := math.Modf(num)
 
-		// If the fractional part is not zero, it's a float
-		if frac != 0 {
-			literal = strconv.FormatFloat(num, 'f', -1, 64)
-		} else {
-			literal = fmt.Sprintf("%.1f", num)
-		}
+		literal = num
 	}
 
 	s.tokens = append(s.tokens, Token{TokenType: tokenType, Lexeme: lexeme, Literal: literal, Line: s.line})
@@ -327,7 +321,29 @@ func (s *Scanner) GetTokens() []Token {
 func (s *Scanner) GetTokensString() []string {
 	tokens := []string{}
 	for _, t := range s.tokens {
-		tokens = append(tokens, fmt.Sprintf("%s %s %s", t.TokenType.String(), t.Lexeme, t.Literal))
+
+		literal := t.Literal
+
+		if t.TokenType == NUMBER {
+			if num, ok := literal.(float64); ok {
+				// Separate the integer and fractional parts
+				_, frac := math.Modf(num)
+
+				// If the fractional part is not zero, it's a float
+				// TODO: this is wrong, should just store as float
+				if frac != 0 {
+					literal = strconv.FormatFloat(num, 'f', -1, 64)
+				} else {
+					literal = fmt.Sprintf("%.1f", num)
+				}
+			}
+		}
+
+		if literal == nil {
+			literal = "null"
+		}
+
+		tokens = append(tokens, fmt.Sprintf("%s %s %s", t.TokenType.String(), t.Lexeme, literal))
 	}
 
 	return tokens
