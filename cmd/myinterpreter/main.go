@@ -91,13 +91,16 @@ func main() {
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "%v\n", err)
 			os.Exit(65)
-
 		}
 
 		interpreter := parser.NewInterpreter()
 		values := interpreter.Evaluate(expr)
 
-		fmt.Println(values)
+		if values == nil {
+			fmt.Println("nil")
+		} else {
+			fmt.Println(values)
+		}
 	} else if command == "parse_test" {
 		b := parser.NewBinary(
 			parser.NewLiteral(1),
