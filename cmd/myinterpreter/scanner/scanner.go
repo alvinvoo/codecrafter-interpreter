@@ -330,7 +330,6 @@ func (s *Scanner) GetTokensString() []string {
 				_, frac := math.Modf(num)
 
 				// If the fractional part is not zero, it's a float
-				// TODO: this is wrong, should just store as float
 				if frac != 0 {
 					literal = strconv.FormatFloat(num, 'f', -1, 64)
 				} else {
