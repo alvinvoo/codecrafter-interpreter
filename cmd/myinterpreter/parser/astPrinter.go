@@ -1,6 +1,10 @@
 package parser
 
-import "fmt"
+import (
+	"fmt"
+
+	"github.com/codecrafters-io/interpreter-starter-go/cmd/myinterpreter/scanner"
+)
 
 type AstPrinter struct{}
 
@@ -31,7 +35,7 @@ func (ap AstPrinter) visitLiteralExpr(l Expr) interface{} {
 		if ll.Value == nil {
 			ret = "nil"
 		} else {
-			ret = fmt.Sprintf("%v", ll.Value)
+			ret = fmt.Sprintf("%v", scanner.HandleNumberLiteral(ll.Value))
 		}
 	}
 

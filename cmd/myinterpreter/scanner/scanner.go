@@ -2,7 +2,6 @@ package scanner
 
 import (
 	"fmt"
-	"math"
 	"strconv"
 	"unicode"
 )
@@ -325,17 +324,7 @@ func (s *Scanner) GetTokensString() []string {
 		literal := t.Literal
 
 		if t.TokenType == NUMBER {
-			if num, ok := literal.(float64); ok {
-				// Separate the integer and fractional parts
-				_, frac := math.Modf(num)
-
-				// If the fractional part is not zero, it's a float
-				if frac != 0 {
-					literal = strconv.FormatFloat(num, 'f', -1, 64)
-				} else {
-					literal = fmt.Sprintf("%.1f", num)
-				}
-			}
+			literal = HandleNumberLiteral(literal)
 		}
 
 		if literal == nil {
