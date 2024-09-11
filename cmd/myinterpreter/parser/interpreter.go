@@ -65,26 +65,35 @@ func (i Interpreter) visitBinaryExpr(b Expr) interface{} {
 
 		switch bb.Operator.TokenType {
 		case scanner.STAR:
-			return left.(int) * right.(int)
+			return left.(float64) * right.(float64)
 		case scanner.SLASH:
-			return left.(int) / right.(int)
+			return left.(float64) / right.(float64)
 		case scanner.GREATER:
-			return left.(int) > right.(int)
+			return left.(float64) > right.(float64)
 		case scanner.GREATER_EQUAL:
-			return left.(int) >= right.(int)
+			return left.(float64) >= right.(float64)
 		case scanner.LESS:
-			return left.(int) < right.(int)
+			return left.(float64) < right.(float64)
 		case scanner.LESS_EQUAL:
-			return left.(int) <= right.(int)
+			return left.(float64) <= right.(float64)
 		case scanner.EQUAL_EQUAL:
 			return left == right
 		case scanner.BANG_EQUAL:
 			return left != right
 		case scanner.MINUS:
-			return left.(int) - right.(int)
-		//TODO: PLUS need to deal with string also
+			return left.(float64) - right.(float64)
 		case scanner.PLUS:
-			return left.(int) + right.(int)
+			if l, ok := left.(float64); ok {
+				if r, ok := right.(float64); ok {
+					return l + r
+				}
+			}
+
+			if l, ok := left.(string); ok {
+				if r, ok := right.(string); ok {
+					return l + r
+				}
+			}
 		}
 	}
 
