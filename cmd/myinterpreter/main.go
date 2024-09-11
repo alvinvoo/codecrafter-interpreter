@@ -94,6 +94,13 @@ func main() {
 		}
 
 		interpreter := parser.NewInterpreter()
+
+		defer func() {
+			if r := recover(); r != nil {
+				fmt.Fprintf(os.Stderr, "%v\n", r.(parser.RuntimeError).Error())
+				os.Exit(70)
+			}
+		}()
 		values := interpreter.Evaluate(expr)
 
 		if values == nil {
