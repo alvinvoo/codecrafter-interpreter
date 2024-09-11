@@ -49,7 +49,7 @@ func (i Interpreter) visitUnaryExpr(u Expr) interface{} {
 
 		switch uu.Operator.TokenType {
 		case scanner.MINUS:
-			return -(right.(int))
+			return -(right.(float64))
 		case scanner.BANG:
 			return !isTruthy(right)
 		}
