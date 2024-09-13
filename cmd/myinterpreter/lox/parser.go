@@ -1,4 +1,4 @@
-package parser
+package lox
 
 /*
 Precedence is from lowest to highest

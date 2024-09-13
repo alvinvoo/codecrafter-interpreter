@@ -1,4 +1,4 @@
-package parser
+package lox
 
 import (
 	"fmt"
@@ -29,7 +29,7 @@ func (ap AstPrinter) Print(expr Expr) string {
 }
 
 // literal        → NUMBER | STRING | "true" | "false" | "nil" ;
-func (ap AstPrinter) VisitLiteralExpr(l Expr) interface{} {
+func (ap AstPrinter) visitLiteralExpr(l Expr) interface{} {
 	var ret string
 	if ll, ok := l.(Literal); ok {
 		if ll.Value == nil {
@@ -42,7 +42,7 @@ func (ap AstPrinter) VisitLiteralExpr(l Expr) interface{} {
 	return ret
 }
 
-func (ap AstPrinter) VisitGroupingExpr(g Expr) interface{} {
+func (ap AstPrinter) visitGroupingExpr(g Expr) interface{} {
 	var ret string
 	if gg, ok := g.(Grouping); ok {
 		ret = ap.parenthesize("group", gg.Expression)
@@ -51,7 +51,7 @@ func (ap AstPrinter) VisitGroupingExpr(g Expr) interface{} {
 	return ret
 }
 
-func (ap AstPrinter) VisitUnaryExpr(u Expr) interface{} {
+func (ap AstPrinter) visitUnaryExpr(u Expr) interface{} {
 	var ret string
 	if uu, ok := u.(Unary); ok {
 		ret = ap.parenthesize(uu.Operator.Lexeme, uu.Right)
@@ -60,7 +60,7 @@ func (ap AstPrinter) VisitUnaryExpr(u Expr) interface{} {
 	return ret
 }
 
-func (ap AstPrinter) VisitBinaryExpr(b Expr) interface{} {
+func (ap AstPrinter) visitBinaryExpr(b Expr) interface{} {
 	var ret string
 	if bb, ok := b.(Binary); ok {
 		ret = ap.parenthesize(bb.Operator.Lexeme, bb.Left, bb.Right)

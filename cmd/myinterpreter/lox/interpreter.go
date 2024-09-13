@@ -1,7 +1,6 @@
-package interpreter
+package lox
 
 import (
-	"github.com/codecrafters-io/interpreter-starter-go/cmd/myinterpreter/parser"
 	"github.com/codecrafters-io/interpreter-starter-go/cmd/myinterpreter/scanner"
 	"github.com/codecrafters-io/interpreter-starter-go/cmd/myinterpreter/util"
 )
@@ -12,20 +11,20 @@ func NewInterpreter() Interpreter {
 	return Interpreter{}
 }
 
-func (i Interpreter) Evaluate(expr parser.Expr) interface{} {
+func (i Interpreter) Evaluate(expr Expr) interface{} {
 	return expr.Accept(i)
 }
 
-func (i Interpreter) VisitLiteralExpr(l parser.Expr) interface{} {
-	if ll, ok := l.(parser.Literal); ok {
+func (i Interpreter) visitLiteralExpr(l Expr) interface{} {
+	if ll, ok := l.(Literal); ok {
 		return ll.Value
 	}
 
 	return nil
 }
 
-func (i Interpreter) VisitGroupingExpr(g parser.Expr) interface{} {
-	if gg, ok := g.(parser.Grouping); ok {
+func (i Interpreter) visitGroupingExpr(g Expr) interface{} {
+	if gg, ok := g.(Grouping); ok {
 		return i.Evaluate(gg.Expression)
 	}
 
@@ -53,8 +52,8 @@ func checkNumberOperand(operator scanner.Token, operand interface{}) {
 	}
 }
 
-func (i Interpreter) VisitUnaryExpr(u parser.Expr) interface{} {
-	if uu, ok := u.(parser.Unary); ok {
+func (i Interpreter) visitUnaryExpr(u Expr) interface{} {
+	if uu, ok := u.(Unary); ok {
 		right := i.Evaluate(uu.Right)
 
 		switch uu.Operator.TokenType {
@@ -95,8 +94,8 @@ func checkNumberOperands(operator scanner.Token, left, right interface{}) {
 	}
 }
 
-func (i Interpreter) VisitBinaryExpr(b parser.Expr) interface{} {
-	if bb, ok := b.(parser.Binary); ok {
+func (i Interpreter) visitBinaryExpr(b Expr) interface{} {
+	if bb, ok := b.(Binary); ok {
 		left := i.Evaluate(bb.Left)
 		right := i.Evaluate(bb.Right)
 

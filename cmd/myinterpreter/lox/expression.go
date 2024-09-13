@@ -1,4 +1,4 @@
-package parser
+package lox
 
 import (
 	"github.com/codecrafters-io/interpreter-starter-go/cmd/myinterpreter/scanner"
@@ -22,10 +22,10 @@ operator       → "==" | "!=" | "<" | "<=" | ">" | ">="
 **/
 
 type Visitor interface {
-	VisitLiteralExpr(literal Expr) interface{}
-	VisitGroupingExpr(grouping Expr) interface{}
-	VisitUnaryExpr(unary Expr) interface{}
-	VisitBinaryExpr(binary Expr) interface{}
+	visitLiteralExpr(literal Expr) interface{}
+	visitGroupingExpr(grouping Expr) interface{}
+	visitUnaryExpr(unary Expr) interface{}
+	visitBinaryExpr(binary Expr) interface{}
 }
 
 type Expr interface {
@@ -41,7 +41,7 @@ func NewLiteral(value interface{}) Literal {
 }
 
 func (l Literal) Accept(v Visitor) interface{} {
-	return v.VisitLiteralExpr(l)
+	return v.visitLiteralExpr(l)
 }
 
 type Grouping struct {
@@ -53,7 +53,7 @@ func NewGrouping(expression Expr) Grouping {
 }
 
 func (g Grouping) Accept(v Visitor) interface{} {
-	return v.VisitGroupingExpr(g)
+	return v.visitGroupingExpr(g)
 }
 
 type Unary struct {
@@ -66,7 +66,7 @@ func NewUnary(operator scanner.Token, right Expr) Unary {
 }
 
 func (u Unary) Accept(v Visitor) interface{} {
-	return v.VisitUnaryExpr(u)
+	return v.visitUnaryExpr(u)
 }
 
 type Binary struct {
@@ -80,5 +80,5 @@ func NewBinary(left Expr, operator scanner.Token, right Expr) Binary {
 }
 
 func (b Binary) Accept(v Visitor) interface{} {
-	return v.VisitBinaryExpr(b)
+	return v.visitBinaryExpr(b)
 }

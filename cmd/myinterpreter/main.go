@@ -4,8 +4,7 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/codecrafters-io/interpreter-starter-go/cmd/myinterpreter/interpreter"
-	"github.com/codecrafters-io/interpreter-starter-go/cmd/myinterpreter/parser"
+	"github.com/codecrafters-io/interpreter-starter-go/cmd/myinterpreter/lox"
 	"github.com/codecrafters-io/interpreter-starter-go/cmd/myinterpreter/scanner"
 	"github.com/codecrafters-io/interpreter-starter-go/cmd/myinterpreter/util"
 )
@@ -73,14 +72,14 @@ func main() {
 			os.Exit(0)
 		}
 
-		p := parser.NewParser(tokens)
+		p := lox.NewParser(tokens)
 		expr, err := p.Parse()
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "%v\n", err)
 			os.Exit(65)
 		}
 
-		fmt.Println(parser.NewAstPrinter().Print(expr))
+		fmt.Println(lox.NewAstPrinter().Print(expr))
 	} else if command == "evaluate" {
 		tokens := readFileAndScan(os.Args[2])
 		if len(tokens) == 0 {
@@ -88,14 +87,14 @@ func main() {
 			os.Exit(0)
 		}
 
-		p := parser.NewParser(tokens)
+		p := lox.NewParser(tokens)
 		expr, err := p.Parse()
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "%v\n", err)
 			os.Exit(65)
 		}
 
-		interpreter := interpreter.NewInterpreter()
+		interpreter := lox.NewInterpreter()
 
 		defer func() {
 			if r := recover(); r != nil {
@@ -111,23 +110,23 @@ func main() {
 			fmt.Printf("%v", values)
 		}
 	} else if command == "parse_test" {
-		b := parser.NewBinary(
-			parser.NewLiteral(1),
+		b := lox.NewBinary(
+			lox.NewLiteral(1),
 			scanner.NewToken(scanner.PLUS, "+", ""),
-			parser.NewLiteral(2),
+			lox.NewLiteral(2),
 		)
 
-		c := parser.NewBinary(
-			parser.NewUnary(
+		c := lox.NewBinary(
+			lox.NewUnary(
 				scanner.NewToken(scanner.MINUS, "-", "null"),
-				parser.NewLiteral(123),
+				lox.NewLiteral(123),
 			),
 			scanner.NewToken(scanner.STAR, "*", "null"),
-			parser.NewGrouping(parser.NewLiteral(45.67)),
+			lox.NewGrouping(lox.NewLiteral(45.67)),
 		)
 
-		fmt.Println(parser.NewAstPrinter().Print(b))
-		fmt.Println(parser.NewAstPrinter().Print(c))
+		fmt.Println(lox.NewAstPrinter().Print(b))
+		fmt.Println(lox.NewAstPrinter().Print(c))
 	} else {
 		fmt.Fprintf(os.Stderr, "Unknown command: %s\n", command)
 		os.Exit(1)
