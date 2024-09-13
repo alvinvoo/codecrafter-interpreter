@@ -73,13 +73,13 @@ func main() {
 		}
 
 		p := lox.NewParser(tokens)
-		statements, err := p.Parse()
+		expr, err := p.ParseExpr()
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "%v\n", err)
 			os.Exit(65)
 		}
 
-		fmt.Println(lox.NewAstPrinter().Print(statements[0]))
+		fmt.Println(lox.NewAstPrinter().Print(expr))
 	} else if command == "evaluate" {
 		tokens := readFileAndScan(os.Args[2])
 		if len(tokens) == 0 {
@@ -88,7 +88,7 @@ func main() {
 		}
 
 		p := lox.NewParser(tokens)
-		statements, err := p.Parse()
+		expr, err := p.ParseExpr()
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "%v\n", err)
 			os.Exit(65)
@@ -103,7 +103,7 @@ func main() {
 			}
 		}()
 
-		values := interpreter.Evaluate(statements[0])
+		values := interpreter.Evaluate(expr)
 
 		if values == nil {
 			fmt.Println("nil")

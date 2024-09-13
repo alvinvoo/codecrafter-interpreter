@@ -257,6 +257,10 @@ func (p *Parser) expressionStatement() (Stmt, error) {
 	return NewExpression(value), nil
 }
 
+func (p *Parser) ParseExpr() (Expr, error) {
+	return p.expression()
+}
+
 func (p *Parser) Parse() ([]Stmt, error) {
 	// TODO: rn only parse one line
 	// need to for !isAtEnd, then add to a list of expressions
