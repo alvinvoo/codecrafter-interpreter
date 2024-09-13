@@ -103,6 +103,36 @@ func main() {
 			}
 		}()
 
+		values := interpreter.Evaluate(statements[0])
+
+		if values == nil {
+			fmt.Println("nil")
+		} else {
+			fmt.Printf("%v", values)
+		}
+	} else if command == "run" {
+		tokens := readFileAndScan(os.Args[2])
+		if len(tokens) == 0 {
+			fmt.Println("No tokens found")
+			os.Exit(0)
+		}
+
+		p := lox.NewParser(tokens)
+		statements, err := p.Parse()
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "%v\n", err)
+			os.Exit(65)
+		}
+
+		interpreter := lox.NewInterpreter()
+
+		defer func() {
+			if r := recover(); r != nil {
+				fmt.Fprintf(os.Stderr, "%v\n", r.(util.RuntimeError).Error())
+				os.Exit(70)
+			}
+		}()
+
 		interpreter.Interpret(statements)
 	} else if command == "parse_test" {
 		b := lox.NewBinary(
