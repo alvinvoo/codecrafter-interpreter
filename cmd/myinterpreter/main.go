@@ -4,8 +4,10 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/codecrafters-io/interpreter-starter-go/cmd/myinterpreter/interpreter"
 	"github.com/codecrafters-io/interpreter-starter-go/cmd/myinterpreter/parser"
 	"github.com/codecrafters-io/interpreter-starter-go/cmd/myinterpreter/scanner"
+	"github.com/codecrafters-io/interpreter-starter-go/cmd/myinterpreter/util"
 )
 
 func readFileAndScan(filename string) []scanner.Token {
@@ -93,11 +95,11 @@ func main() {
 			os.Exit(65)
 		}
 
-		interpreter := parser.NewInterpreter()
+		interpreter := interpreter.NewInterpreter()
 
 		defer func() {
 			if r := recover(); r != nil {
-				fmt.Fprintf(os.Stderr, "%v\n", r.(parser.RuntimeError).Error())
+				fmt.Fprintf(os.Stderr, "%v\n", r.(util.RuntimeError).Error())
 				os.Exit(70)
 			}
 		}()

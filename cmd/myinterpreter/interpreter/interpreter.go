@@ -1,7 +1,9 @@
-package parser
+package interpreter
 
 import (
+	"github.com/codecrafters-io/interpreter-starter-go/cmd/myinterpreter/parser"
 	"github.com/codecrafters-io/interpreter-starter-go/cmd/myinterpreter/scanner"
+	"github.com/codecrafters-io/interpreter-starter-go/cmd/myinterpreter/util"
 )
 
 type Interpreter struct{}
@@ -10,20 +12,20 @@ func NewInterpreter() Interpreter {
 	return Interpreter{}
 }
 
-func (i Interpreter) Evaluate(expr Expr) interface{} {
+func (i Interpreter) Evaluate(expr parser.Expr) interface{} {
 	return expr.Accept(i)
 }
 
-func (i Interpreter) visitLiteralExpr(l Expr) interface{} {
-	if ll, ok := l.(Literal); ok {
+func (i Interpreter) VisitLiteralExpr(l parser.Expr) interface{} {
+	if ll, ok := l.(parser.Literal); ok {
 		return ll.Value
 	}
 
 	return nil
 }
 
-func (i Interpreter) visitGroupingExpr(g Expr) interface{} {
-	if gg, ok := g.(Grouping); ok {
+func (i Interpreter) VisitGroupingExpr(g parser.Expr) interface{} {
+	if gg, ok := g.(parser.Grouping); ok {
 		return i.Evaluate(gg.Expression)
 	}
 
@@ -46,13 +48,13 @@ func isTruthy(obj interface{}) bool {
 func checkNumberOperand(operator scanner.Token, operand interface{}) {
 	if _, ok := operand.(float64); !ok {
 		panic(
-			NewRuntimeError(operator, "Operand must be a number."),
+			util.NewRuntimeError(operator, "Operand must be a number."),
 		)
 	}
 }
 
-func (i Interpreter) visitUnaryExpr(u Expr) interface{} {
-	if uu, ok := u.(Unary); ok {
+func (i Interpreter) VisitUnaryExpr(u parser.Expr) interface{} {
+	if uu, ok := u.(parser.Unary); ok {
 		right := i.Evaluate(uu.Right)
 
 		switch uu.Operator.TokenType {
@@ -82,19 +84,19 @@ func isEqual(a, b interface{}) bool {
 func checkNumberOperands(operator scanner.Token, left, right interface{}) {
 	if _, ok := left.(float64); !ok {
 		panic(
-			NewRuntimeError(operator, "Left operand must be a number."),
+			util.NewRuntimeError(operator, "Left operand must be a number."),
 		)
 	}
 
 	if _, ok := right.(float64); !ok {
 		panic(
-			NewRuntimeError(operator, "Right operand must be a number."),
+			util.NewRuntimeError(operator, "Right operand must be a number."),
 		)
 	}
 }
 
-func (i Interpreter) visitBinaryExpr(b Expr) interface{} {
-	if bb, ok := b.(Binary); ok {
+func (i Interpreter) VisitBinaryExpr(b parser.Expr) interface{} {
+	if bb, ok := b.(parser.Binary); ok {
 		left := i.Evaluate(bb.Left)
 		right := i.Evaluate(bb.Right)
 
@@ -138,7 +140,7 @@ func (i Interpreter) visitBinaryExpr(b Expr) interface{} {
 			}
 
 			panic(
-				NewRuntimeError(bb.Operator, "Operands must be two numbers or two strings."),
+				util.NewRuntimeError(bb.Operator, "Operands must be two numbers or two strings."),
 			)
 		}
 	}

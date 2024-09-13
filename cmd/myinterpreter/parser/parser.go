@@ -24,6 +24,7 @@ import (
 	"fmt"
 
 	"github.com/codecrafters-io/interpreter-starter-go/cmd/myinterpreter/scanner"
+	"github.com/codecrafters-io/interpreter-starter-go/cmd/myinterpreter/util"
 )
 
 type Parser struct {
@@ -208,7 +209,7 @@ func (p *Parser) primary() (Expr, error) {
 		return NewGrouping(expr), nil
 	}
 
-	return NewLiteral(nil), fmt.Errorf(Error(p.peek(), "Expect expression"))
+	return NewLiteral(nil), fmt.Errorf(util.Error(p.peek(), "Expect expression"))
 }
 
 func (p *Parser) Parse() (Expr, error) {
