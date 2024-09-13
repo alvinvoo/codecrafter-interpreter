@@ -18,6 +18,15 @@ term           → factor ( ( "-" | "+" ) factor )* ; // * means zero or more
 factor         → unary ( ( "/" | "*" ) unary )* ;
 unary          → ( "!" | "-" ) unary | primary ;
 primary        → NUMBER | STRING | "true" | "false" | "nil" | "(" expression ")"
+
+// new rules for statements
+program        → statement* EOF ;
+
+statement      → exprStmt
+               | printStmt ;
+
+exprStmt       → expression ";" ;
+printStmt      → "print" expression ";" ;
 */
 
 import (
@@ -212,8 +221,54 @@ func (p *Parser) primary() (Expr, error) {
 	return NewLiteral(nil), fmt.Errorf(util.Error(p.peek(), "Expect expression"))
 }
 
-func (p *Parser) Parse() (Expr, error) {
+func (p *Parser) statement() (Stmt, error) {
+	if p.matchAny(scanner.PRINT) {
+		return p.printStatement()
+	}
+
+	return p.expressionStatement()
+}
+
+func (p *Parser) printStatement() (Stmt, error) {
+	value, err := p.expression()
+	if err != nil {
+		return nil, err
+	}
+
+	_, err = p.consume(scanner.SEMICOLON, "';'")
+	if err != nil {
+		return nil, err
+	}
+
+	return NewPrint(value), nil
+}
+
+func (p *Parser) expressionStatement() (Stmt, error) {
+	value, err := p.expression()
+	if err != nil {
+		return nil, err
+	}
+
+	_, err = p.consume(scanner.SEMICOLON, "';'")
+	if err != nil {
+		return nil, err
+	}
+
+	return NewExpression(value), nil
+}
+
+func (p *Parser) Parse() ([]Stmt, error) {
 	// TODO: rn only parse one line
 	// need to for !isAtEnd, then add to a list of expressions
-	return p.expression()
+	var statements []Stmt
+	for !p.isAtEnd() {
+		stmt, err := p.statement()
+		if err != nil {
+			return nil, err
+		}
+
+		statements = append(statements, stmt)
+	}
+
+	return statements, nil
 }

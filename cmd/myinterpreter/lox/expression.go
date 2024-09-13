@@ -21,13 +21,6 @@ operator       → "==" | "!=" | "<" | "<=" | ">" | ">="
 ** This still grammar has ambiguity
 **/
 
-type Visitor interface {
-	visitLiteralExpr(literal Expr) interface{}
-	visitGroupingExpr(grouping Expr) interface{}
-	visitUnaryExpr(unary Expr) interface{}
-	visitBinaryExpr(binary Expr) interface{}
-}
-
 type Expr interface {
 	Accept(v Visitor) interface{}
 }

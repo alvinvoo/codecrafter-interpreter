@@ -1,6 +1,8 @@
 package lox
 
 import (
+	"fmt"
+
 	"github.com/codecrafters-io/interpreter-starter-go/cmd/myinterpreter/scanner"
 	"github.com/codecrafters-io/interpreter-starter-go/cmd/myinterpreter/util"
 )
@@ -9,6 +11,12 @@ type Interpreter struct{}
 
 func NewInterpreter() Interpreter {
 	return Interpreter{}
+}
+
+func (i Interpreter) Interpret(statements []Stmt) {
+	for _, stmt := range statements {
+		i.Evaluate(stmt)
+	}
 }
 
 func (i Interpreter) Evaluate(expr Expr) interface{} {
@@ -144,5 +152,20 @@ func (i Interpreter) visitBinaryExpr(b Expr) interface{} {
 		}
 	}
 
+	return nil
+}
+
+func (i Interpreter) visitExpressionStmt(es Stmt) interface{} {
+	if e, ok := es.(Expression); ok {
+		return i.Evaluate(e.Expression)
+	}
+	return nil
+}
+
+func (i Interpreter) visitPrintStmt(ps Stmt) interface{} {
+	if p, ok := ps.(Print); ok {
+		value := i.Evaluate(p.Expression)
+		fmt.Printf("%v\n", value)
+	}
 	return nil
 }

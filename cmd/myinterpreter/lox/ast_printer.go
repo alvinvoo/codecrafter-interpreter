@@ -68,3 +68,17 @@ func (ap AstPrinter) visitBinaryExpr(b Expr) interface{} {
 
 	return ret
 }
+
+func (ap AstPrinter) visitPrintStmt(p Stmt) interface{} {
+	if pp, ok := p.(Print); ok {
+		return ap.parenthesize("print", pp.Expression)
+	}
+	return nil
+}
+
+func (ap AstPrinter) visitExpressionStmt(e Stmt) interface{} {
+	if ee, ok := e.(Expression); ok {
+		return ap.parenthesize(";", ee.Expression)
+	}
+	return nil
+}
