@@ -262,8 +262,6 @@ func (p *Parser) ParseExpr() (Expr, error) {
 }
 
 func (p *Parser) Parse() ([]Stmt, error) {
-	// TODO: rn only parse one line
-	// need to for !isAtEnd, then add to a list of expressions
 	var statements []Stmt
 	for !p.isAtEnd() {
 		stmt, err := p.statement()

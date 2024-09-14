@@ -269,7 +269,7 @@ func (s *Scanner) Tokenize() {
 		case '"':
 			// as long as cannot find closing quote
 			for !s.nextMatch('"') {
-				if s.isAtEnd() || s.nextMatch('\n') {
+				if s.isAtEnd() {
 					s.addError("Unterminated string.")
 					break
 				}
